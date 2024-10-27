@@ -32,7 +32,7 @@ internal class StorageStep : OnboardingStep {
 
     private val storagePref = Injekt.get<StoragePreferences>().baseStorageDirectory()
 
-    private var _isComplete by mutableStateOf(false)
+    private var _isComplete by mutableStateOf(true)
 
     override val isComplete: Boolean
         get() = _isComplete
@@ -61,7 +61,7 @@ internal class StorageStep : OnboardingStep {
                 onClick = {
                     try {
                         pickStorageLocation.launch(null)
-                    } catch (e: ActivityNotFoundException) {
+                    } catch (_: ActivityNotFoundException) {
                         context.toast(MR.strings.file_picker_error)
                     }
                 },

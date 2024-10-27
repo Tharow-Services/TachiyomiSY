@@ -8,10 +8,6 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.drop
-import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.shareIn
 
@@ -29,21 +25,13 @@ class StorageManager(
         .shareIn(scope, SharingStarted.Lazily, 1)
 
     init {
-        storagePreferences.baseStorageDirectory().changes()
-            .drop(1)
-            .distinctUntilChanged()
-            .onEach { uri ->
-                baseDir = getBaseDir(uri)
-                baseDir?.let { parent ->
-                    parent.createDirectory(AUTOMATIC_BACKUPS_PATH)
-                    parent.createDirectory(LOCAL_SOURCE_PATH)
-                    parent.createDirectory(DOWNLOADS_PATH).also {
-                        DiskUtil.createNoMediaFile(it, context)
-                    }
+            baseDir?.let { parent ->
+                parent.createDirectory(AUTOMATIC_BACKUPS_PATH)
+                parent.createDirectory(LOCAL_SOURCE_PATH)
+                parent.createDirectory(DOWNLOADS_PATH).also {
+                    DiskUtil.createNoMediaFile(it, context)
                 }
-                _changes.send(Unit)
             }
-            .launchIn(scope)
     }
 
     private fun getBaseDir(uri: String): UniFile? {
@@ -69,6 +57,7 @@ class StorageManager(
     }
     // SY <--
 }
+
 
 private const val AUTOMATIC_BACKUPS_PATH = "autobackup"
 private const val DOWNLOADS_PATH = "downloads"
