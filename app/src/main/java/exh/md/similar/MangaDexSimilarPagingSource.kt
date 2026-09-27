@@ -5,7 +5,7 @@ import eu.kanade.domain.manga.model.toSManga
 import eu.kanade.tachiyomi.network.HttpException
 import eu.kanade.tachiyomi.source.model.MangasPage
 import eu.kanade.tachiyomi.source.model.MetadataMangasPage
-import eu.kanade.tachiyomi.source.online.all.MangaDex
+import eu.kanade.tachiyomi.source.online.all.MangaDexFactory
 import exh.recs.sources.RecommendationPagingSource
 import exh.source.getMainSource
 import kotlinx.coroutines.async
@@ -19,7 +19,7 @@ import tachiyomi.i18n.sy.SYMR
  */
 class MangaDexSimilarPagingSource(
     manga: Manga,
-    private val mangaDex: MangaDex,
+    private val mangaDex: MangaDexFactory,
 ) : RecommendationPagingSource(manga, mangaDex) {
 
     override val name: String

@@ -6,7 +6,7 @@ import eu.kanade.tachiyomi.network.NetworkHelper
 import eu.kanade.tachiyomi.source.Source
 import eu.kanade.tachiyomi.source.model.MangasPage
 import eu.kanade.tachiyomi.source.model.SManga
-import eu.kanade.tachiyomi.source.online.all.MangaDex
+import eu.kanade.tachiyomi.source.online.all.MangaDexFactory
 import exh.md.similar.MangaDexSimilarPagingSource
 import exh.pref.DelegateSourcePreferences
 import exh.source.getMainSource
@@ -54,7 +54,7 @@ abstract class RecommendationPagingSource(
 
                 // Only include MangaDex if the delegate sources are enabled and the source is MD-based
                 if (source.isMdBasedSource() && Injekt.get<DelegateSourcePreferences>().delegateSources.get()) {
-                    add(MangaDexSimilarPagingSource(manga, source.getMainSource() as MangaDex))
+                    add(MangaDexSimilarPagingSource(manga, source.getMainSource() as MangaDexFactory))
                 }
 
                 // Only include Comick if the source manga is from there

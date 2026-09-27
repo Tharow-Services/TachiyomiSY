@@ -25,7 +25,7 @@ import eu.kanade.presentation.util.ioCoroutineScope
 import eu.kanade.tachiyomi.data.cache.CoverCache
 import eu.kanade.tachiyomi.source.model.FilterList
 import eu.kanade.tachiyomi.source.online.MetadataSource
-import eu.kanade.tachiyomi.source.online.all.MangaDex
+import eu.kanade.tachiyomi.source.online.all.MangaDexFactory
 import eu.kanade.tachiyomi.util.removeCovers
 import exh.metadata.metadata.RaisedSearchMetadata
 import exh.source.ExhPreferences
@@ -531,7 +531,7 @@ open class BrowseSourceScreenModel(
 
     fun onMangaDexRandom(onRandomFound: (String) -> Unit) {
         screenModelScope.launchIO {
-            val random = source.getMainSource<MangaDex>()?.fetchRandomMangaUrl()
+            val random = source.getMainSource<MangaDexFactory>()?.fetchRandomMangaUrl()
                 ?: return@launchIO
             onRandomFound(random)
         }

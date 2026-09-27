@@ -18,6 +18,7 @@ import kotlinx.serialization.json.putJsonObject
 import kotlin.reflect.KMutableProperty1
 import kotlin.reflect.full.isSubclassOf
 
+@Suppress("PLATFORM_CLASS_MAPPED_TO_KOTLIN")
 class FilterSerializer {
     private val serializers = listOf<Serializer<*>>(
         // SY -->

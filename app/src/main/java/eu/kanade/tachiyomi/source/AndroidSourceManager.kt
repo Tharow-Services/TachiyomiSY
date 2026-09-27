@@ -6,27 +6,14 @@ import eu.kanade.tachiyomi.data.download.DownloadManager
 import eu.kanade.tachiyomi.extension.ExtensionManager
 import eu.kanade.tachiyomi.source.online.HttpSource
 import eu.kanade.tachiyomi.source.online.all.EHentai
-import eu.kanade.tachiyomi.source.online.all.Lanraragi
-import eu.kanade.tachiyomi.source.online.all.MangaDex
 import eu.kanade.tachiyomi.source.online.all.MergedSource
-import eu.kanade.tachiyomi.source.online.all.NHentai
-import eu.kanade.tachiyomi.source.online.english.EightMuses
-import eu.kanade.tachiyomi.source.online.english.HBrowse
-import eu.kanade.tachiyomi.source.online.english.Pururin
-import eu.kanade.tachiyomi.source.online.english.Tsumino
-import exh.log.xLogD
 import exh.source.BlacklistedSources
 import exh.source.DelegatedHttpSource
 import exh.source.EH_SOURCE_ID
-import exh.source.EIGHTMUSES_SOURCE_ID
 import exh.source.EXH_SOURCE_ID
 import exh.source.EnhancedHttpSource
 import exh.source.ExhPreferences
-import exh.source.HBROWSE_SOURCE_ID
 import exh.source.MERGED_SOURCE_ID
-import exh.source.PURURIN_SOURCE_ID
-import exh.source.TSUMINO_SOURCE_ID
-import exh.source.handleSourceLibrary
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -102,11 +89,11 @@ class AndroidSourceManager(
                             put(EXH_SOURCE_ID, EHentai(EXH_SOURCE_ID, true, context))
                         }
                         put(MERGED_SOURCE_ID, MergedSource())
-                        // SY <--
+                        // SY <--w
                     }
 
                     extensions.forEach { extension ->
-                        extension.sources.mapNotNull { it.toInternalSource() }.forEach {
+                        extension.sources.map { it }.forEach {
                             mutableMap[it.id] = it
                             registerStubSource(StubSource.from(it))
                         }
@@ -125,55 +112,6 @@ class AndroidSourceManager(
                     }
                 }
         }
-    }
-
-    private fun Source.toInternalSource(): Source? {
-        // EXH -->
-        val sourceQName = this::class.qualifiedName
-        val factories = DELEGATED_SOURCES.entries
-            .filter { it.value.factory }
-            .map { it.value.originalSourceQualifiedClassName }
-        val delegate = if (sourceQName != null) {
-            val matched = factories.find { sourceQName.startsWith(it) }
-            if (matched != null) {
-                DELEGATED_SOURCES[matched]
-            } else {
-                DELEGATED_SOURCES[sourceQName]
-            }
-        } else {
-            null
-        }
-        val newSource = if (this is HttpSource && delegate != null) {
-            xLogD("Delegating source: %s -> %s!", sourceQName, delegate.newSourceClass.qualifiedName)
-            val enhancedSource = EnhancedHttpSource(
-                this,
-                delegate.newSourceClass.constructors.find { it.parameters.size == 2 }!!.call(this, context),
-            )
-
-            currentDelegatedSources[enhancedSource.originalSource.id] = DelegatedSource(
-                enhancedSource.originalSource.name,
-                enhancedSource.originalSource.id,
-                enhancedSource.originalSource::class.qualifiedName ?: delegate.originalSourceQualifiedClassName,
-                (enhancedSource.enhancedSource as DelegatedHttpSource)::class,
-                delegate.factory,
-            )
-            enhancedSource
-        } else {
-            this
-        }
-
-        return if (id in BlacklistedSources.BLACKLISTED_EXT_SOURCES) {
-            xLogD(
-                "Removing blacklisted source: (id: %s, name: %s, lang: %s)!",
-                id,
-                name,
-                lang,
-            )
-            null
-        } else {
-            newSource
-        }
-        // EXH <--
     }
 
     override fun get(sourceKey: Long): Source? {
@@ -239,64 +177,6 @@ class AndroidSourceManager(
     // SY -->
     companion object {
         private const val fillInSourceId = Long.MAX_VALUE
-        val DELEGATED_SOURCES = listOf(
-            DelegatedSource(
-                "Pururin",
-                PURURIN_SOURCE_ID,
-                "eu.kanade.tachiyomi.extension.en.pururin.Pururin",
-                Pururin::class,
-            ),
-            DelegatedSource(
-                "Tsumino",
-                TSUMINO_SOURCE_ID,
-                "eu.kanade.tachiyomi.extension.en.tsumino.Tsumino",
-                Tsumino::class,
-            ),
-            DelegatedSource(
-                "MangaDex",
-                fillInSourceId,
-                "eu.kanade.tachiyomi.extension.all.mangadex",
-                MangaDex::class,
-                true,
-            ),
-            DelegatedSource(
-                "HBrowse",
-                HBROWSE_SOURCE_ID,
-                "eu.kanade.tachiyomi.extension.en.hbrowse.HBrowse",
-                HBrowse::class,
-            ),
-            DelegatedSource(
-                "8Muses",
-                EIGHTMUSES_SOURCE_ID,
-                "eu.kanade.tachiyomi.extension.en.eightmuses.EightMuses",
-                EightMuses::class,
-            ),
-            DelegatedSource(
-                "NHentai",
-                fillInSourceId,
-                "eu.kanade.tachiyomi.extension.all.nhentai.NHentai",
-                NHentai::class,
-                true,
-            ),
-            DelegatedSource(
-                "LANraragi",
-                fillInSourceId,
-                "eu.kanade.tachiyomi.extension.all.lanraragi.LANraragi",
-                Lanraragi::class,
-                true,
-            ),
-        ).associateBy { it.originalSourceQualifiedClassName }
-
-        val currentDelegatedSources: MutableMap<Long, DelegatedSource> =
-            ListenMutableMap(mutableMapOf(), ::handleSourceLibrary)
-
-        data class DelegatedSource(
-            val sourceName: String,
-            val sourceId: Long,
-            val originalSourceQualifiedClassName: String,
-            val newSourceClass: KClass<out DelegatedHttpSource>,
-            val factory: Boolean = false,
-        )
     }
 
     private class ListenMutableMap<K, V>(
