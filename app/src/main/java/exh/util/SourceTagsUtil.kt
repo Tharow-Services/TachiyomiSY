@@ -4,8 +4,6 @@ import androidx.core.graphics.toColorInt
 import exh.metadata.metadata.base.RaisedTag
 import exh.source.EH_SOURCE_ID
 import exh.source.EXH_SOURCE_ID
-import exh.source.PURURIN_SOURCE_ID
-import exh.source.TSUMINO_SOURCE_ID
 import exh.source.lanraragiSourceIds
 import exh.source.mangaDexSourceIds
 import exh.source.nHentaiSourceIds
@@ -23,8 +21,6 @@ object SourceTagsUtil {
             sourceId == EH_SOURCE_ID ||
             sourceId in nHentaiSourceIds ||
             sourceId in mangaDexSourceIds ||
-            sourceId == PURURIN_SOURCE_ID ||
-            sourceId == TSUMINO_SOURCE_ID ||
             sourceId in lanraragiSourceIds
         ) {
             val parsed = when {
@@ -36,8 +32,6 @@ object SourceTagsUtil {
                 when (sourceId) {
                     in nHentaiSourceIds -> wrapTagNHentai(parsed.namespace!!, parsed.name.substringBefore('|').trim())
                     in mangaDexSourceIds -> parsed.name
-                    PURURIN_SOURCE_ID -> parsed.name.substringBefore('|').trim()
-                    TSUMINO_SOURCE_ID -> wrapTagTsumino(parsed.namespace!!, parsed.name.substringBefore('|').trim())
                     else -> wrapTag(parsed.namespace!!, parsed.name.substringBefore('|').trim())
                 }
             } else {

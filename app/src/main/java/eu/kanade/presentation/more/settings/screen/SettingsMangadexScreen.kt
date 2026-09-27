@@ -34,7 +34,7 @@ import eu.kanade.presentation.more.settings.widget.BasePreferenceWidget
 import eu.kanade.presentation.more.settings.widget.PrefsHorizontalPadding
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.library.LibraryUpdateJob
-import eu.kanade.tachiyomi.source.online.all.MangaDex
+import eu.kanade.tachiyomi.source.online.all.MangaDexFactory
 import eu.kanade.tachiyomi.util.system.openInBrowser
 import eu.kanade.tachiyomi.util.system.toast
 import exh.md.utils.MdConstants
@@ -99,7 +99,7 @@ object SettingsMangadexScreen : SearchableSettings {
 
     @Composable
     fun loginPreference(
-        mdex: MangaDex,
+        mdex: MangaDexFactory,
         trackPreferences: TrackPreferences,
     ): Preference.PreferenceItem.CustomPreference {
         val context = LocalContext.current

@@ -1,7 +1,7 @@
 package exh.md.follows
 
 import eu.kanade.tachiyomi.source.model.FilterList
-import eu.kanade.tachiyomi.source.online.all.MangaDex
+import eu.kanade.tachiyomi.source.online.all.MangaDexFactory
 import eu.kanade.tachiyomi.ui.browse.source.browse.BrowseSourceScreenModel
 import exh.metadata.metadata.RaisedSearchMetadata
 import exh.source.getMainSource
@@ -14,7 +14,7 @@ import tachiyomi.domain.manga.model.Manga
 class MangaDexFollowsScreenModel(sourceId: Long) : BrowseSourceScreenModel(sourceId, null) {
 
     override fun createSourcePagingSource(query: String, filters: FilterList): BaseSourcePagingSource {
-        return MangaDexFollowsPagingSource(source.getMainSource() as MangaDex)
+        return MangaDexFollowsPagingSource(source.getMainSource() as MangaDexFactory)
     }
 
     override fun Flow<Manga>.combineMetadata(metadata: RaisedSearchMetadata?): Flow<Pair<Manga, RaisedSearchMetadata?>> {

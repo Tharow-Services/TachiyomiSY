@@ -151,7 +151,7 @@ class EnhancedHttpSource(
     // ===> OPTIONAL FIELDS
 
     /**
-     * Id of the source. By default it uses a generated id using the first 16 characters (64 bits)
+     * Id of the source. By default, it uses a generated id using the first 16 characters (64 bits)
      * of the MD5 of the string: sourcename/language/versionId
      * Note the generated id sets the sign bit to 0.
      */

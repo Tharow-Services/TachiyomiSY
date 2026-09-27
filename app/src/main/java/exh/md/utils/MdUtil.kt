@@ -7,7 +7,7 @@ import eu.kanade.tachiyomi.data.track.mdlist.MdList
 import eu.kanade.tachiyomi.data.track.myanimelist.dto.MALOAuth
 import eu.kanade.tachiyomi.network.POST
 import eu.kanade.tachiyomi.source.model.SManga
-import eu.kanade.tachiyomi.source.online.all.MangaDex
+import eu.kanade.tachiyomi.source.online.all.MangaDexFactory
 import eu.kanade.tachiyomi.util.PkceUtil
 import exh.md.dto.MangaAttributesDto
 import exh.md.dto.MangaDataDto
@@ -191,7 +191,7 @@ class MdUtil {
         fun getEnabledMangaDex(
             sourcePreferences: SourcePreferences = Injekt.get(),
             sourceManager: SourceManager = Injekt.get(),
-        ): MangaDex? {
+        ): MangaDexFactory? {
             return getEnabledMangaDexs(sourcePreferences, sourceManager).let { mangadexs ->
                 sourcePreferences.preferredMangaDexId.get().toLongOrNull()?.nullIfZero()
                     ?.let { preferredMangaDexId ->
@@ -204,13 +204,13 @@ class MdUtil {
         fun getEnabledMangaDexs(
             preferences: SourcePreferences,
             sourceManager: SourceManager = Injekt.get(),
-        ): List<MangaDex> {
+        ): List<MangaDexFactory> {
             val languages = preferences.enabledLanguages.get()
             val disabledSourceIds = preferences.disabledSources.get()
 
             return sourceManager.getVisibleOnlineSources()
                 .asSequence()
-                .mapNotNull { it.getMainSource<MangaDex>() }
+                .mapNotNull { it.getMainSource<MangaDexFactory>() }
                 .filter { it.lang in languages }
                 .filterNot { it.id.toString() in disabledSourceIds }
                 .toList()
