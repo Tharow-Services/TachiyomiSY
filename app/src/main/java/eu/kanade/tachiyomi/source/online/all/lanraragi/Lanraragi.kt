@@ -2,6 +2,7 @@ package eu.kanade.tachiyomi.source.online.all.lanraragi
 
 import android.content.Context
 import android.net.Uri
+import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.network.GET
 import eu.kanade.tachiyomi.network.awaitSuccess
 import eu.kanade.tachiyomi.network.newCachelessCallWithProgress
@@ -13,7 +14,7 @@ import eu.kanade.tachiyomi.source.PagePreviewSource
 import eu.kanade.tachiyomi.source.PreferenceScreen
 import eu.kanade.tachiyomi.source.model.SChapter
 import eu.kanade.tachiyomi.source.model.SManga
-import eu.kanade.tachiyomi.source.online.HttpSource
+import eu.kanade.tachiyomi.source.online.DrawableSource
 import eu.kanade.tachiyomi.source.online.MetadataSource
 import eu.kanade.tachiyomi.source.online.NamespaceSource
 import exh.metadata.MetadataUtil
@@ -35,16 +36,18 @@ import java.io.IOException
 import java.time.Instant
 import java.time.ZoneOffset
 import kotlin.time.Duration.Companion.milliseconds
+import androidx.core.net.toUri
 
 class Lanraragi(val context: Context, override val id: Long) :
     DelegatedHttpSource(LANraragi(context, id)),
     MetadataSource<LanraragiSearchMetadata, Response>,
     NamespaceSource,
     PagePreviewSource,
-    ConfigurableSource{
+    ConfigurableSource, DrawableSource{
     override val metaClass = LanraragiSearchMetadata::class
     override fun newMetaInstance() = LanraragiSearchMetadata()
     override val lang = delegate.lang
+    override val iconRes: Int = R.mipmap.ic_lanraragi_source
 
     private fun getApiUriBuilder(path: String): Uri.Builder {
         return LanraragiSearchMetadata.getApiUriBuilder(baseUrl, path)
@@ -54,6 +57,7 @@ class Lanraragi(val context: Context, override val id: Long) :
         return READER_ID_REGEX.find(url)?.groupValues?.get(1) ?: ""
     }
 
+    @Suppress("unused")
     private fun getThumbnailId(url: String): String {
         return THUMBNAIL_ID_REGEX.find(url)?.groupValues?.get(1) ?: ""
     }
@@ -70,7 +74,7 @@ class Lanraragi(val context: Context, override val id: Long) :
 
     private suspend fun customMangaDetailsRequest(manga: SManga): Request {
         val id = if (manga.url.startsWith("/api/search/random")) {
-            getRandomID(Uri.parse(manga.url).encodedQuery.toString())
+            getRandomID(manga.url.toUri().encodedQuery.toString())
         } else {
             getReaderId(manga.url)
         }
@@ -79,6 +83,7 @@ class Lanraragi(val context: Context, override val id: Long) :
         return GET(uri.toString(), headers)
     }
 
+    @Suppress("DEPRECATION")
     @Deprecated("Use the 1.x API instead", replaceWith = ReplaceWith("getMangaDetails"))
     override fun fetchMangaDetails(manga: SManga): Observable<SManga> {
         return runAsObservable {
@@ -125,7 +130,7 @@ class Lanraragi(val context: Context, override val id: Long) :
                         RaisedTag(
                             tag.substringBefore(
                                 ':',
-                                LanraragiSearchMetadata.LANRARAGI_NAMESPACE_OTHER
+                                LanraragiSearchMetadata.LANRARAGI_NAMESPACE_OTHER,
                             ),
                             tag.substringAfter(':'),
                             LanraragiSearchMetadata.TAG_TYPE_DEFAULT,
@@ -167,7 +172,7 @@ class Lanraragi(val context: Context, override val id: Long) :
                     imageUrl = LanraragiSearchMetadata.getThumbnailUri(
                         baseUrl,
                         metadata.arcId!!,
-                        index
+                        index,
                     ),
                 )
             },
@@ -215,7 +220,7 @@ class Lanraragi(val context: Context, override val id: Long) :
     override suspend fun fetchPreviewImage(page: PagePreviewInfo, cacheControl: CacheControl?): Response {
         return requestPreviewImage(page, cacheControl).let {
             if (it.code == 202) {
-                val task = with(Lanraragi.jsonParser) {
+                val task = with(jsonParser) {
                     it.parseAs<ThumbnailTask>()
                 }
                 var tries = 0

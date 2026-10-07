@@ -3,7 +3,6 @@ package eu.kanade.tachiyomi.source.online.all
 import android.content.Context
 import android.content.SharedPreferences
 import android.net.Uri
-import androidx.core.content.ContextCompat
 import eu.kanade.domain.track.service.TrackPreferences
 import eu.kanade.tachiyomi.BuildConfig
 import eu.kanade.tachiyomi.R
@@ -11,18 +10,17 @@ import eu.kanade.tachiyomi.data.database.models.Track
 import eu.kanade.tachiyomi.data.track.TrackerManager
 import eu.kanade.tachiyomi.data.track.mdlist.MdList
 import eu.kanade.tachiyomi.source.online.all.mangadex.MangaDex
-import eu.kanade.tachiyomi.extension.model.Extension
 import eu.kanade.tachiyomi.network.asObservableSuccess
 import eu.kanade.tachiyomi.network.awaitSuccess
 import eu.kanade.tachiyomi.source.Source
-import eu.kanade.tachiyomi.source.SourceFactory
 import eu.kanade.tachiyomi.source.model.MangasPage
 import eu.kanade.tachiyomi.source.model.MetadataMangasPage
 import eu.kanade.tachiyomi.source.model.Page
 import eu.kanade.tachiyomi.source.model.SChapter
 import eu.kanade.tachiyomi.source.model.SManga
+import eu.kanade.tachiyomi.source.online.DrawableSource
 import eu.kanade.tachiyomi.source.online.FollowsSource
-import eu.kanade.tachiyomi.source.online.InternalExtensions
+import eu.kanade.tachiyomi.source.online.InternalSourceFactory
 import eu.kanade.tachiyomi.source.online.LoginSource
 import eu.kanade.tachiyomi.source.online.MetadataSource
 import eu.kanade.tachiyomi.source.online.NamespaceSource
@@ -63,15 +61,16 @@ import uy.kohesive.injekt.injectLazy
 import kotlin.reflect.KClass
 
 @Suppress("OverridingDeprecatedMember")
-class MangaDexFactory(val context: Context, override val lang: String, ):
+class MangaDexFactory(val context: Context, override val lang: String):
     DelegatedHttpSource(MangaDex(context, MANGADEX_SOURCE_ID, lang)),
     MetadataSource<MangaDexSearchMetadata, Triple<MangaDto, List<String>, StatisticsMangaDto>>,
     UrlImportableSource,
     FollowsSource,
     LoginSource,
     RandomMangaSource,
-    NamespaceSource {
+    NamespaceSource, DrawableSource{
     override val id: Long = generateId(name, lang, BuildConfig.VERSION_CODE)
+    override val iconRes: Int = R.mipmap.ic_mangadex_source
     private val mdLang by lazy {
         MdLang.fromExt(lang) ?: MdLang.ENGLISH
     }
@@ -349,8 +348,25 @@ class MangaDexFactory(val context: Context, override val lang: String, ):
 
 
 
-    companion object: SourceFactory {
+    companion object: InternalSourceFactory {
+        override val name: String = "MangaDex"
+        override val lang: String = "all"
+        override val isNsfw: Boolean = true
+        override val icon: Int = R.mipmap.ic_mangadex_source
+        override val pkgFactory: String = ""
+        override val pkgName: String = "all.mangadex"
         private const val dataSaverPref = "dataSaverV5"
+
+        override fun createSources(context: Context): List<Source> {
+            return languages.map { MangaDexFactory(context = context, it) }
+        }
+        private val languages: List<String> = listOf(
+            "af", "sq", "ar", "az", "eu", "be", "bn", "bg", "my", "ca", "zh-Hans", "zh-Hant",
+            "cv", "hr", "cs", "da", "nl", "en", "eo", "et", "fil", "fi", "fr", "ka", "de", "el",
+            "he", "hi", "hu", "ga", "id", "it", "ja", "jv", "kk", "ko", "la", "lt", "ms", "mn",
+            "ne", "no", "fa", "pl", "pt-BR", "pt", "ro", "ru", "sr", "sk", "es-419", "es", "sv",
+            "ta", "te", "th", "tr", "uk", "ur", "uz", "vi",
+        )
         fun getDataSaverPreferenceKey(dexLang: String): String {
             return "${dataSaverPref}_$dexLang"
         }
@@ -395,36 +411,6 @@ class MangaDexFactory(val context: Context, override val lang: String, ):
             return "${preferExtensionLangTitlePref}_$dexLang"
         }
 
-        fun getExtension()= Extension.Installed(
-            name = "MangaDex",
-            pkgName = "all.mangadex",
-            versionName = BuildConfig.VERSION_NAME,
-            versionCode = BuildConfig.VERSION_CODE.toLong(),
-            libVersion = 1.6,
-            lang = "all",
-            isNsfw = true,
-            pkgFactory = "eu.kanade.tachiyomi.source.online.all.MangaDexFactory",
-            sources = createSources(),
-            icon = ContextCompat.getDrawable(Injekt.get(), R.mipmap.ic_mangadex_source),
-            hasUpdate = false,
-            isObsolete = false,
-            isShared = false,
-            store = InternalExtensions.INTERNAL_EXTENSION_STORE,
-            isRedundant = false
-        )
-
-        override fun createSources(): List<Source> {
-            val context: Context = Injekt.get()
-            return languages.map { MangaDexFactory(context = context, it) }
-        }
-
-        private val languages: List<String> = listOf(
-            "af", "sq", "ar", "az", "eu", "be", "bn", "bg", "my", "ca", "zh-Hans", "zh-Hant",
-            "cv", "hr", "cs", "da", "nl", "en", "eo", "et", "fil", "fi", "fr", "ka", "de", "el",
-            "he", "hi", "hu", "ga", "id", "it", "ja", "jv", "kk", "ko", "la", "lt", "ms", "mn",
-            "ne", "no", "fa", "pl", "pt-BR", "pt", "ro", "ru", "sr", "sk", "es-419", "es", "sv",
-            "ta", "te", "th", "tr", "uk", "ur", "uz", "vi",
-        )
 
 
     }

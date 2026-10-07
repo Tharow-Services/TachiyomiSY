@@ -5,6 +5,7 @@ import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.net.Uri
 import androidx.core.net.toUri
+import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.network.GET
 import eu.kanade.tachiyomi.network.asObservableSuccess
 import eu.kanade.tachiyomi.network.await
@@ -22,6 +23,7 @@ import eu.kanade.tachiyomi.source.model.SChapter
 import eu.kanade.tachiyomi.source.model.SManga
 import eu.kanade.tachiyomi.source.model.SMangaUpdate
 import eu.kanade.tachiyomi.source.model.copy
+import eu.kanade.tachiyomi.source.online.DrawableSource
 import eu.kanade.tachiyomi.source.online.HttpSource
 import eu.kanade.tachiyomi.source.online.MetadataSource
 import eu.kanade.tachiyomi.source.online.NamespaceSource
@@ -45,6 +47,7 @@ import exh.metadata.metadata.EHentaiSearchMetadata.Companion.TAG_TYPE_WEAK
 import exh.metadata.metadata.RaisedSearchMetadata.Companion.TAG_TYPE_VIRTUAL
 import exh.metadata.metadata.RaisedSearchMetadata.Companion.toGenreString
 import exh.metadata.metadata.base.RaisedTag
+import exh.source.EH_SOURCE_ID
 import exh.source.ExhPreferences
 import exh.ui.login.EhLoginActivity
 import exh.util.UriFilter
@@ -104,8 +107,10 @@ class EHentai(
     MetadataSource<EHentaiSearchMetadata, Document>,
     UrlImportableSource,
     NamespaceSource,
-    PagePreviewSource {
+    PagePreviewSource,
+    DrawableSource{
     override val metaClass = EHentaiSearchMetadata::class
+    override val iconRes: Int = R.mipmap.ic_merged_source
 
     private val domain: String
         get() = if (exh) {

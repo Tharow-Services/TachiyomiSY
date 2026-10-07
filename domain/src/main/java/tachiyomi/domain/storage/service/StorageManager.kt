@@ -1,7 +1,6 @@
 package tachiyomi.domain.storage.service
 
 import android.content.Context
-import androidx.core.net.toUri
 import com.hippo.unifile.UniFile
 import eu.kanade.tachiyomi.util.storage.DiskUtil
 import kotlinx.coroutines.CoroutineScope

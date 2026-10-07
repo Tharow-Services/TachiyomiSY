@@ -3,6 +3,7 @@ package eu.kanade.tachiyomi.source.online.all
 import eu.kanade.domain.chapter.interactor.SyncChaptersWithSource
 import eu.kanade.domain.manga.interactor.UpdateManga
 import eu.kanade.domain.manga.model.toSManga
+import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.download.DownloadManager
 import eu.kanade.tachiyomi.source.Source
 import eu.kanade.tachiyomi.source.model.FilterList
@@ -11,6 +12,7 @@ import eu.kanade.tachiyomi.source.model.SChapter
 import eu.kanade.tachiyomi.source.model.SManga
 import eu.kanade.tachiyomi.source.model.SMangaUpdate
 import eu.kanade.tachiyomi.source.model.copy
+import eu.kanade.tachiyomi.source.online.DrawableSource
 import eu.kanade.tachiyomi.source.online.HttpSource
 import exh.source.MERGED_SOURCE_ID
 import kotlinx.coroutines.CancellationException
@@ -34,7 +36,7 @@ import tachiyomi.domain.manga.model.MergedMangaReference
 import tachiyomi.domain.source.service.SourceManager
 import uy.kohesive.injekt.injectLazy
 
-class MergedSource : HttpSource() {
+class MergedSource : HttpSource(), DrawableSource {
     private val getManga: GetManga by injectLazy()
     private val getMergedReferencesById: GetMergedReferencesById by injectLazy()
     private val syncChaptersWithSource: SyncChaptersWithSource by injectLazy()
@@ -48,6 +50,7 @@ class MergedSource : HttpSource() {
     private val filterChaptersForDownload: FilterChaptersForDownload by injectLazy()
 
     override val id: Long = MERGED_SOURCE_ID
+    override val iconRes: Int = R.mipmap.ic_merged_source
 
     override val baseUrl = ""
 

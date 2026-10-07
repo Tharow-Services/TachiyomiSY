@@ -9,6 +9,9 @@ import android.text.Html
 import android.text.Layout
 import android.text.StaticLayout
 import android.text.TextPaint
+import android.util.Log
+import androidx.core.graphics.createBitmap
+import androidx.core.graphics.withTranslation
 import okhttp3.Interceptor
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.Protocol
@@ -24,9 +27,6 @@ private const val HEADING_FONT_SIZE: Float = 36f
 private const val BODY_FONT_SIZE: Float = 30f
 private const val SPACING_MULT: Float = 1.1f
 private const val SPACING_ADD: Float = 2f
-
-// No need to touch this one:
-private const val HOST = TextInterceptorHelper.HOST
 
 class TextInterceptor : Interceptor {
     // With help from:
@@ -87,7 +87,7 @@ class TextInterceptor : Interceptor {
         val headingHeight = heading?.height ?: 0
         val bodyHeight = body?.height ?: 0
         val imgHeight: Int = (headingHeight + bodyHeight + 2 * Y_PADDING).toInt()
-        val bitmap: Bitmap = Bitmap.createBitmap(WIDTH, imgHeight, Bitmap.Config.ARGB_8888)
+        val bitmap: Bitmap = createBitmap(WIDTH, imgHeight)
 
         Canvas(bitmap).apply {
             drawColor(Color.WHITE)
@@ -112,16 +112,45 @@ class TextInterceptor : Interceptor {
 
     @Suppress("SameParameterValue")
     private fun StaticLayout.draw(canvas: Canvas, x: Float, y: Float) {
-        canvas.save()
-        canvas.translate(x, y)
-        this.draw(canvas)
-        canvas.restore()
+        canvas.withTranslation(x, y) {
+            this@draw.draw(this)
+        }
+    }
+    companion object {
+        const val HOST = "tachiyomi-lib-textinterceptor"
+
+        fun createUrl(title: String, text: String): String = "http://$HOST/" + Uri.encode(title) + "/" + Uri.encode(text)
     }
 }
 
-object TextInterceptorHelper {
 
-    const val HOST = "tachiyomi-lib-textinterceptor"
 
-    fun createUrl(title: String, text: String): String = "http://$HOST/" + Uri.encode(title) + "/" + Uri.encode(text)
+
+class AssetInterceptor: Interceptor {
+    override fun intercept(chain: Interceptor.Chain): Response {
+        val request = chain.request()
+        if (request.url.host != HOST) {return chain.proceed(request)}
+        val file = request.url.encodedPath.drop(1)
+        val inputStream: ByteArray? = Companion::class.java.classLoader?.getResourceAsStream(file)?.readBytes()
+        if (inputStream == null) {
+            Log.e("AssetInterceptor", "Input Stream for $file asset returned null")
+            return chain.proceed(request)
+        }
+        val contentType = "image/${file.substringAfterLast('.')}"
+        val responseBody = inputStream.toResponseBody(contentType.toMediaType())
+        return Response.Builder()
+            .request(request)
+            .protocol(Protocol.HTTP_1_1)
+            .code(200)
+            .message("OK")
+            .body(responseBody)
+            .build()
+
+    }
+
+    companion object {
+        const val HOST: String = "tachiyomi-asset-interceptor"
+        fun createUrl(file: String):String = "https://$HOST/assets/$file"
+
+    }
 }

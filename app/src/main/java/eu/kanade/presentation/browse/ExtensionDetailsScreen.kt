@@ -86,7 +86,6 @@ fun ExtensionDetailsScreen(
             }
             ?: state.extension?.store?.indexUrl
     }
-
     Scaffold(
         topBar = { scrollBehavior ->
             AppBar(
@@ -95,7 +94,7 @@ fun ExtensionDetailsScreen(
                 actions = {
                     AppBarActions(
                         actions = buildList {
-                            if (url != null) {
+                            if (!url.isNullOrEmpty()) {
                                 add(
                                     AppBar.Action(
                                         title = stringResource(MR.strings.action_open_repo),
@@ -336,14 +335,13 @@ private fun DetailsHeader(
                 .padding(top = MaterialTheme.padding.small),
             horizontalArrangement = Arrangement.spacedBy(MaterialTheme.padding.medium),
         ) {
-            OutlinedButton(
-                modifier = Modifier.weight(1f),
-                onClick = onClickUninstall,
-            ) {
-                Text(stringResource(MR.strings.ext_uninstall))
-            }
-
             if (onClickAppInfo != null) {
+                OutlinedButton(
+                    modifier = Modifier.weight(1f),
+                    onClick = onClickUninstall,
+                ) {
+                    Text(stringResource(MR.strings.ext_uninstall))
+                }
                 Button(
                     modifier = Modifier.weight(1f),
                     onClick = onClickAppInfo,

@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.SharedPreferences
 import androidx.preference.PreferenceScreen
 import androidx.preference.SwitchPreferenceCompat
+import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.network.GET
 import eu.kanade.tachiyomi.source.ConfigurableSource
 import eu.kanade.tachiyomi.source.Source
@@ -15,15 +16,13 @@ import eu.kanade.tachiyomi.source.model.SChapter
 import eu.kanade.tachiyomi.source.model.SManga
 import eu.kanade.tachiyomi.source.model.SMangaUpdate
 import eu.kanade.tachiyomi.source.model.UpdateStrategy
+import eu.kanade.tachiyomi.source.online.AssetInterceptor
+import eu.kanade.tachiyomi.source.online.DrawableSource
 import eu.kanade.tachiyomi.source.online.HttpSource
-import eu.kanade.tachiyomi.source.online.LoginSource
+import eu.kanade.tachiyomi.source.online.TextInterceptor
 import eu.kanade.tachiyomi.util.asJsoup
 import kotlinx.serialization.json.JsonObject
-import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
-import okhttp3.Protocol
-import okhttp3.Response
-import okhttp3.ResponseBody.Companion.toResponseBody
 import java.sql.Date
 import java.text.SimpleDateFormat
 import java.time.Instant
@@ -33,13 +32,13 @@ import java.util.Locale
 class GrrlPower(
     val context: Context,
     override val id: Long,
-    override val name: String = "Grrl Power Comic",
+    override val name: String = "Grrl Power",
     override val supportsLatest: Boolean = false,
     override val lang: String = "en",
     override val baseUrl: String = "https://grrlpowercomic.com",
     override var url: String ="/archive",
-    override var title: String = "Grrl Power Comic",
-    override var thumbnail_url: String? = "https://static.tvtropes.org/pmwiki/pub/images/rsz_grrl_power.pngh",
+    override var title: String = name,
+    override var thumbnail_url: String? = AssetInterceptor.createUrl("thumbnails/grrl_power_comic.jpeg"),
     override var artist: String? = "David Barrack",
     override var author: String? = artist,
     override var status: Int = SManga.ONGOING,
@@ -54,12 +53,17 @@ class GrrlPower(
     override val originalDescription: String? = description,
     override val originalGenre: String? = genre,
     override val originalStatus: Int = status,
-    override var initialized: Boolean = true
+    override var initialized: Boolean = true,
+    override val iconRes: Int = R.mipmap.ic_grrlpower_source
 ) :
-    HttpSource(), ConfigurableSource, Source, UnmeteredSource, SManga {
+    HttpSource(), ConfigurableSource, Source, UnmeteredSource, SManga, DrawableSource {
     private val currentYear = Calendar.getInstance().get(Calendar.YEAR)
 
-    private val dateFormat by lazy {
+    override val client: OkHttpClient = super.client.newBuilder()
+        .addInterceptor(TextInterceptor())
+        .addInterceptor(AssetInterceptor())
+        .build()
+        private val dateFormat by lazy {
         SimpleDateFormat("MMM dd yyyy", Locale.US)
     }
 
@@ -75,9 +79,10 @@ class GrrlPower(
         chapters: List<SChapter>,
         fetchDetails: Boolean,
         fetchChapters: Boolean
-    ): SMangaUpdate = SMangaUpdate(manga, chapters = (2010..currentYear).flatMap { year ->
-        if (fetchChapters) {
-            client.newCall(GET("$baseUrl/archive/?archive_year=$year")).execute().use { response ->
+    ): SMangaUpdate = SMangaUpdate(
+        manga = this,
+        chapters = if (fetchChapters) {
+            (2010..currentYear).flatMap { year -> client.newCall(GET("$baseUrl/archive/?archive_year=$year")).execute().use { response ->
                 if (!response.isSuccessful) {
                     throw Exception("HTTP error ${response.code}")
                 }
@@ -90,9 +95,8 @@ class GrrlPower(
                         date_upload = (dateFormat.parse(dateStr) ?: Date.from(Instant.EPOCH)).time
                     }
                 }
-            }
-        } else chapters
-    }.sortedByDescending { it.date_upload })
+            } }.sortedBy { it.date_upload }.mapIndexed { index, chapter -> chapter.apply { this.chapter_number = index.toFloat() } }
+        } else chapters)
 
     // =============================== Pages ===============================
 
@@ -112,8 +116,32 @@ class GrrlPower(
             )
         }
 
+        val text = soup.getElementsByClass("entry").html()
+        if (text.isNotEmpty() && showAuthorsNotesPref()) {
+            pages.add(
+                Page(
+                    index = pages.size,
+                    imageUrl = TextInterceptor.createUrl("Author's Notes from $author", text),
+                ),
+            )
+        }
+
         return pages
     }
 
-    override fun setupPreferenceScreen(screen: eu.kanade.tachiyomi.source.PreferenceScreen) {}
+    private fun showAuthorsNotesPref() = preferences.getBoolean(SHOW_AUTHORS_NOTES_KEY, false)
+
+    override fun setupPreferenceScreen(screen: PreferenceScreen) {
+        val authorsNotesPref = SwitchPreferenceCompat(screen.context).apply {
+            key = SHOW_AUTHORS_NOTES_KEY
+            title = "Show author's notes"
+            summary = "Enable to see the author's notes at the end of chapters (if they're there)."
+            setDefaultValue(false)
+        }
+        screen.addPreference(authorsNotesPref)
+    }
+
+    companion object {
+        private const val SHOW_AUTHORS_NOTES_KEY = "showAuthorsNotes"
+    }
 }

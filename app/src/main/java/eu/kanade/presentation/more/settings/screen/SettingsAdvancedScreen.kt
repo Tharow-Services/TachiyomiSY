@@ -3,7 +3,6 @@ package eu.kanade.presentation.more.settings.screen
 import android.annotation.SuppressLint
 import android.content.ActivityNotFoundException
 import android.content.Intent
-import android.os.Build
 import android.provider.Settings
 import android.webkit.WebStorage
 import android.webkit.WebView
@@ -56,7 +55,6 @@ import eu.kanade.tachiyomi.network.PREF_DOH_NJALLA
 import eu.kanade.tachiyomi.network.PREF_DOH_QUAD101
 import eu.kanade.tachiyomi.network.PREF_DOH_QUAD9
 import eu.kanade.tachiyomi.network.PREF_DOH_SHECAN
-import eu.kanade.tachiyomi.source.AndroidSourceManager
 import eu.kanade.tachiyomi.ui.more.OnboardingScreen
 import eu.kanade.tachiyomi.util.CrashLogUtil
 import eu.kanade.tachiyomi.util.storage.DiskUtil
@@ -69,7 +67,6 @@ import eu.kanade.tachiyomi.util.system.setDefaultSettings
 import eu.kanade.tachiyomi.util.system.toast
 import exh.debug.SettingsDebugScreen
 import exh.log.EHLogLevel
-import exh.pref.DelegateSourcePreferences
 import exh.source.BlacklistedSources
 import exh.source.EH_SOURCE_ID
 import exh.source.EXH_SOURCE_ID
@@ -101,6 +98,7 @@ import uy.kohesive.injekt.api.get
 import java.io.File
 
 object SettingsAdvancedScreen : SearchableSettings {
+    private fun readResolve(): Any = SettingsAdvancedScreen
 
     @ReadOnlyComposable
     @Composable
@@ -149,14 +147,8 @@ object SettingsAdvancedScreen : SearchableSettings {
                 onClick = {
                     // SY -->
                     val intent = Intent().apply {
-                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                            setAction(Settings.ACTION_APP_NOTIFICATION_SETTINGS)
-                            putExtra(Settings.EXTRA_APP_PACKAGE, context.packageName)
-                        } else {
-                            setAction("android.settings.APP_NOTIFICATION_SETTINGS")
-                            putExtra("app_package", context.packageName)
-                            putExtra("app_uid", context.applicationInfo.uid)
-                        }
+                        setAction(Settings.ACTION_APP_NOTIFICATION_SETTINGS)
+                        putExtra(Settings.EXTRA_APP_PACKAGE, context.packageName)
                     }
                     // SY <--
                     context.startActivity(intent)
@@ -199,7 +191,7 @@ object SettingsAdvancedScreen : SearchableSettings {
                                     addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
                                 }
                                 context.startActivity(intent)
-                            } catch (e: ActivityNotFoundException) {
+                            } catch (_: ActivityNotFoundException) {
                                 context.toast(MR.strings.battery_optimization_setting_activity_not_found)
                             }
                         } else {
@@ -520,6 +512,7 @@ object SettingsAdvancedScreen : SearchableSettings {
     }
 
     // SY -->
+    @SuppressLint("LocalContextResourcesRead")
     @Composable
     fun CleanupDownloadsDialog(
         onDismissRequest: () -> Unit,
@@ -733,7 +726,6 @@ object SettingsAdvancedScreen : SearchableSettings {
         val navigator = LocalNavigator.currentOrThrow
         val sourcePreferences = remember { Injekt.get<SourcePreferences>() }
         val exhPreferences = remember { Injekt.get<ExhPreferences>() }
-        val delegateSourcePreferences = remember { Injekt.get<DelegateSourcePreferences>() }
         val securityPreferences = remember { Injekt.get<SecurityPreferences>() }
         return Preference.PreferenceGroup(
             title = stringResource(SYMR.strings.developer_tools),
@@ -752,15 +744,6 @@ object SettingsAdvancedScreen : SearchableSettings {
                         }
                         true
                     },
-                ),
-                Preference.PreferenceItem.SwitchPreference(
-                    preference = delegateSourcePreferences.delegateSources,
-                    title = stringResource(SYMR.strings.toggle_delegated_sources),
-                    subtitle = stringResource(
-                        SYMR.strings.toggle_delegated_sources_summary,
-                        stringResource(MR.strings.app_name),
-                        "All Delegated Sources Have been moved internally to the app"
-                    ),
                 ),
                 Preference.PreferenceItem.ListPreference(
                     preference = exhPreferences.logLevel,

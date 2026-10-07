@@ -14,19 +14,12 @@ import eu.kanade.tachiyomi.extension.model.LoadResult
 import eu.kanade.tachiyomi.extension.util.ExtensionInstallReceiver
 import eu.kanade.tachiyomi.extension.util.ExtensionInstaller
 import eu.kanade.tachiyomi.extension.util.ExtensionLoader
-import eu.kanade.tachiyomi.source.online.all.MangaDexFactory
+import eu.kanade.tachiyomi.source.online.DrawableSource
 import eu.kanade.tachiyomi.util.system.toast
 import exh.log.xLogD
 import exh.source.BlacklistedSources
-import exh.source.DEBUG_SOURCE_ID
 import exh.source.EH_SOURCE_ID
 import exh.source.EXH_SOURCE_ID
-import exh.source.GRRL_POWER_COMIC_SOURCE_ID
-import exh.source.LANRARAGI_ONE_SOURCE_ID
-import exh.source.LANRARAGI_THREE_SOURCE_ID
-import exh.source.LANRARAGI_TWO_SOURCE_ID
-import exh.source.MERGED_SOURCE_ID
-import exh.source.QUESTIONABLE_CONTENT_SOURCE_ID
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.Flow
@@ -114,31 +107,21 @@ class ExtensionManager(
 
     fun getAppIconForSource(sourceId: Long): Drawable? {
         val pkgName = getExtensionPackage(sourceId)
-        val mangadex = MangaDexFactory.getExtension()
-        if (pkgName== mangadex.pkgName) {
-            return mangadex.icon
+        val source = installedExtensionsFlow.value.find { it.pkgName==pkgName }?.sources?.find {it.id == sourceId}
+        if (source is DrawableSource) {
+            return ContextCompat.getDrawable(context, source.iconRes)
         }
-        return when (sourceId) {
-            EH_SOURCE_ID -> ContextCompat.getDrawable(context, R.mipmap.ic_ehentai_source)
-            EXH_SOURCE_ID -> ContextCompat.getDrawable(context, R.mipmap.ic_exhentai_source)
-            LANRARAGI_ONE_SOURCE_ID, LANRARAGI_TWO_SOURCE_ID, LANRARAGI_THREE_SOURCE_ID -> ContextCompat.getDrawable(context, R.mipmap.ic_lanraragi_source)
-            GRRL_POWER_COMIC_SOURCE_ID -> ContextCompat.getDrawable(context, R.mipmap.ic_grrlpower_source)
-            QUESTIONABLE_CONTENT_SOURCE_ID -> ContextCompat.getDrawable(context,R.mipmap.ic_questionablecontent_source)
-            DEBUG_SOURCE_ID -> ContextCompat.getDrawable(context, R.mipmap.ic_launcher)
-            MERGED_SOURCE_ID -> ContextCompat.getDrawable(context, R.mipmap.ic_merged_source)
-            else -> if (!pkgName.isNullOrEmpty()) {
-                iconMap[pkgName] ?: iconMap.getOrPut(pkgName) {
-                    ExtensionLoader.getExtensionPackageInfoFromPkgName(context, pkgName)!!.applicationInfo!!
-                        .loadIcon(context.packageManager)
-                }
-            } else null
+        if (pkgName.isNullOrEmpty()) {
+            return when (sourceId) {
+                EH_SOURCE_ID -> ContextCompat.getDrawable(context, R.mipmap.ic_ehentai_source)
+                EXH_SOURCE_ID -> ContextCompat.getDrawable(context, R.mipmap.ic_ehentai_source)
+                else -> null
+            }
         }
-
-
-
-        // SY -->
-
-        // SY <--
+        return iconMap[pkgName] ?: iconMap.getOrPut(pkgName) {
+                ExtensionLoader.getExtensionPackageInfoFromPkgName(context, pkgName)?.applicationInfo
+                    ?.loadIcon(context.packageManager)?: ContextCompat.getDrawable(context, R.mipmap.ic_default_source)!!
+            }
     }
 
     private var availableExtensionsSourcesData: Map<Long, StubSource> = emptyMap()

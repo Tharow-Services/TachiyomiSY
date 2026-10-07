@@ -7,6 +7,8 @@ import android.text.InputType
 import android.util.Base64
 import android.util.Log
 import android.widget.Toast
+import androidx.core.content.edit
+import androidx.core.net.toUri
 import androidx.preference.CheckBoxPreference
 import androidx.preference.EditTextPreference
 import androidx.preference.ListPreference
@@ -41,7 +43,7 @@ import java.io.IOException
 import java.net.URL
 import kotlin.math.max
 
-
+@Suppress("OVERRIDE_DEPRECATION")
 class LANraragi(
     val context: Context,
     override val id: Long,
@@ -78,7 +80,7 @@ class LANraragi(
         val uri = apiTypeByID(id)
 
         if (manga.url.startsWith("/api/search/random")) {
-            val randQuery = Uri.parse(manga.url).encodedQuery.toString()
+            val randQuery = manga.url.toUri().encodedQuery.toString()
             randomArchiveID = getRandomID(randQuery)
         }
 
@@ -214,7 +216,7 @@ class LANraragi(
             if (!subPath.isNullOrEmpty()) {
                 newUrl = newUrl.replaceFirst(subPath, "")
             }
-            val uri = Uri.parse("${baseUrl}${newUrl.trimStart('.')}")
+            val uri = "${baseUrl}${newUrl.trimStart('.')}".toUri()
             Page(index, uri.toString(), uri.toString(), uri)
         }
     }
@@ -433,7 +435,7 @@ class LANraragi(
         setDefaultValue(default)
 
         setOnPreferenceChangeListener { _, newValue ->
-            preferences.edit().putBoolean(this.key, newValue as Boolean).commit()
+            preferences.edit(commit = true) { putBoolean(this@checkBoxPreference.key, (newValue as Boolean)) }; true
         }
     }
 
@@ -523,7 +525,7 @@ class LANraragi(
 
     private fun startingPageStats(): String = if (maxResultCount > 0 && totalRecords > 0) " ($maxResultCount / $lastRecordsFiltered items)" else ""
 
-    private fun getApiUriBuilder(path: String): Uri.Builder = Uri.parse("$baseUrl$path").buildUpon()
+    private fun getApiUriBuilder(path: String): Uri.Builder = "$baseUrl$path".toUri().buildUpon()
 
     private fun getThumbnailUri(id: String): String {
         val type = if (id.startsWith("TANK_")) "tankoubons" else "archives"
