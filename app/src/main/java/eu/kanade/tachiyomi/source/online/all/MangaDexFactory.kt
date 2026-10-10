@@ -60,7 +60,7 @@ import uy.kohesive.injekt.api.get
 import uy.kohesive.injekt.injectLazy
 import kotlin.reflect.KClass
 
-@Suppress("OverridingDeprecatedMember")
+@Suppress("OverridingDeprecatedMember", "DEPRECATION")
 class MangaDexFactory(val context: Context, override val lang: String):
     DelegatedHttpSource(MangaDex(context, MANGADEX_SOURCE_ID, lang)),
     MetadataSource<MangaDexSearchMetadata, Triple<MangaDto, List<String>, StatisticsMangaDto>>,

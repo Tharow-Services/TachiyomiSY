@@ -1,6 +1,8 @@
 package eu.kanade.tachiyomi.source.online.all.webtoon.dto
 
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.json.JsonIgnoreUnknownKeys
+import kotlin.uuid.Uuid
 
 @Serializable
 data class ServiceInfoHolder(
@@ -24,3 +26,26 @@ data class ServiceInfo(
     val ageGateTimeMap: Map<String, Long>,
     val remindPushSchedules: Map<String, String>,
 )
+
+
+@Serializable @ApiLocation("getRsaKey.json?v=2")
+data class RSAKey(
+    val keyName: String,
+    val nvalue: String,
+    val evalue: String,
+    val sessionKey: String,
+)
+
+@Serializable @ApiLocation("loginById.json") @JsonIgnoreUnknownKeys
+data class LoginById( //TODO create enum's for login info
+    val id: String,
+    val idNo: Uuid,
+    val statCd: String,
+    val loginStatus: Int,
+    val svcCd: String,
+    val ses: String,
+    val hashedNeoId: String,
+    val nickname: String,
+    val isMember: Boolean,
+    val updatedRevisit: Boolean,
+    )

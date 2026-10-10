@@ -1,0 +1,36 @@
+{
+  "filteredMccMap": {},
+  "filteredCountryMap": {},
+  "apiVersion": "0.0.1",
+  "imageDomain": "http://awebtoon.phinf.naver.net",
+  "imageUrl": "https://webtoon-phinf.pstatic.net",
+  "productImageDomain": "https://prowebtoon-phinf.pstatic.net",
+  "creatorFeedUrl": "https://www.webtoons.com/p/community/%s/feeds",
+  "creatorHomeUrl": "https://www.webtoons.com/p/community/%s/u/%s",
+  "joinBackgroundUrlMap": {
+    "de": "/20260109_300/17679244093000p3pW_PNG/8bg_DE.png?type=opti",
+    "th": "/20260109_6/1767924439351QEbYU_PNG/8bg_TH.png?type=opti",
+    "zh-hant": "/20260109_153/1767924444483Exknm_PNG/0bg_TW.png?type=opti",
+    "en": "/20260109_282/17679244182645OKnt_PNG/5bg_EN.png?type=opti",
+    "id": "/20260109_155/1767924428723lRd7O_PNG/7bg_ID.png?type=opti",
+    "fr": "/20260109_172/17679244242868TAgJ_PNG/3bg_FR.png?type=opti",
+    "es": "/20260109_18/1767924433690PTjWo_PNG/0bg_SP.png?type=opti"
+  },
+  "hideAd": false,
+  "ageGateTime": 1317941991517,
+  "ageGateTimeMap": {
+    "DE": 1286405991517,
+    "FR": 1317941991517,
+    "DEFAULT": 1286405991517,
+    "ES": 1349564391517
+  },
+  "remindPushSchedules": {
+    "de": "04:41",
+    "th": "23:41",
+    "zh-hant": "22:41",
+    "en": "09:41",
+    "id": "23:41",
+    "fr": "22:41",
+    "es": "09:41"
+  }
+}

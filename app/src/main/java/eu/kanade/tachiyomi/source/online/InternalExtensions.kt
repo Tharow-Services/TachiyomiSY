@@ -7,12 +7,6 @@ import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.extension.model.Extension
 import eu.kanade.tachiyomi.source.Source
 import eu.kanade.tachiyomi.source.SourceFactory
-import eu.kanade.tachiyomi.source.model.FilterList
-import eu.kanade.tachiyomi.source.model.MangasPage
-import eu.kanade.tachiyomi.source.model.Page
-import eu.kanade.tachiyomi.source.model.SChapter
-import eu.kanade.tachiyomi.source.model.SManga
-import eu.kanade.tachiyomi.source.model.SMangaUpdate
 import eu.kanade.tachiyomi.source.online.all.MangaDexFactory
 import eu.kanade.tachiyomi.source.online.all.comicfury.ComicFury
 import eu.kanade.tachiyomi.source.online.all.lanraragi.Lanraragi
@@ -32,7 +26,6 @@ val INTERNAL_EXTENSIONS: List<InternalSourceFactory> =
     listOf(
         InternalExtension,
         MangaDexFactory,
-        DebugSource,
         ComicFury,
         Webtoon
     )
@@ -100,33 +93,6 @@ object InternalExtension: InternalSourceFactory{
         GrrlPower(context, GRRL_POWER_COMIC_SOURCE_ID),
         QuestionableContent(context, QUESTIONABLE_CONTENT_SOURCE_ID),
     )
-}
-
-class DebugSource: Source {
-    override val id: Long = 1L
-    override val name: String = "Debug Source"
-    override val supportsLatest: Boolean = false
-    override val lang: String = "all"
-
-    override suspend fun getPopularManga(page: Int) = MangasPage(listOf(), false)
-    override suspend fun getLatestUpdates(page: Int)=getPopularManga(page)
-    override suspend fun getSearchManga(page: Int, query: String, filters: FilterList, ) = getPopularManga(page)
-    override suspend fun getMangaUpdate(
-        manga: SManga,
-        chapters: List<SChapter>,
-        fetchDetails: Boolean,
-        fetchChapters: Boolean,
-    ) = SMangaUpdate(manga, chapters)
-    override suspend fun getPageList(chapter: SChapter): List<Page> = listOf()
-    companion object: InternalSourceFactory {
-        override val name: String = "Debug Extension"
-        override val lang: String = "all"
-        override val isNsfw: Boolean = false
-        override val icon: Int? = null
-        override val pkgFactory: String = ""
-        override fun createSources(context: Context) = listOf(DebugSource())
-
-    }
 }
 
 

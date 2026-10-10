@@ -1,19 +1,23 @@
 package eu.kanade.tachiyomi.source.online.all.webtoon.dto
 
-import eu.kanade.tachiyomi.source.model.Page
-import eu.kanade.tachiyomi.source.model.SChapter
-import eu.kanade.tachiyomi.source.model.SManga
-import eu.kanade.tachiyomi.source.model.UpdateStrategy
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.json.JsonIgnoreUnknownKeys
+import kotlinx.serialization.json.JsonNames
 
 @Serializable
-data class ChallengeTitleHolder(
+data class TitleHome(
     val point: PointMessage? = null,
-    val challengeTitle: ChallengeTitle,
-    val tag: ChallengeTag,
+    @JsonNames("challengeTitle")
+    val title: Title,
+    val tag: TitleTags,
     val superLike: SuperLike? = null,
-    val challengeEpisodeMeta: ChallengeEpisodeMeta,
-    val rewardAd: ChallengeRewardAd,
+    @JsonNames("challengeEpisodeMeta")
+    val episodeMeta: TitleEpisodeMeta,
+    @JsonNames("challengeAuthorPatreon")
+    val authorPatreon: AuthorPatreon? = null,
+    val highlight: Highlight? = null,
+    val product: TitleHomeProduct? = null,
+    val rewardAd: TitleRewardAd? = null,
 )
 
 @Serializable
@@ -28,8 +32,8 @@ data class SuperLike(
 )
 
 @Serializable
-data class ChallengeEpisodeHolder(
-    val regionalContentRatingMap: Map<String, String>,
+data class ViewerEpisode(
+    val regionalContentRatingMap: Map<String, String>? = null,
     val challengeEpisode: ChallengeEpisode,
     val superLikeEnabled: Boolean,
     val adExposure: AdExposure,
@@ -41,60 +45,77 @@ data class ChallengeEpisodeHolder(
     val representGenreCode: String, //TODO create enum for genre code
     val restTerminationStatus: String, //TODO create enum for rest termination status
     val titleHomePcWebUrl: String,
-    val firstEpisodeViewerPcWebUrl: String
+    val firstEpisodeViewerPcWebUrl: String,
+    @JsonNames("challengeAuthorPatreon")
+    val authorPatreon: AuthorPatreon? = null
 )
 @Serializable
-data class ChallengeTitle(
+data class Title(
     val titleNo: Long,
-    val sourceLanguage: String, //TODO Create lang enum
-    val readingLanguage: String,
-    val source: Boolean,
-    val readingTitle: String,
-    val sourceSynopsis: String,
-    val readingSynopsis: String,
+    @JsonNames("readingTitle")
+    val title: String,
+    val language: String? = null,
+    val sourceLanguage: String? = language, //TODO Create lang enum
+    val readingLanguage: String? = language,
+    val source: Boolean? = null,
+    val viewer: String? = null, //TODO create viewer enum
+    val synopsis: String? = null,
+    val sourceSynopsis: String? = synopsis,
+    val readingSynopsis: String? = synopsis,
     val restTerminationStatus: String, //TODO read rest Status
     val representGenre: RepresentGenre,
+    @JsonNames("posterThumbnailUrl")
     val thumbnailUrl: String,
-    val author: ChallengeAuthor,
+    val instagramShareImageUrl: String? = null,
+    val blockUnsuitableForChildren: Boolean? = null,
+    val author: TitleAuthor? = null,
+    val contentRating: String? = null,
+    val authorList: List<TitleAuthor>? = null,
     val previewAvailable: Boolean,
-    val lastEpisodeRegisterYmdt: Long,
-    val likeitCount: Long,
-    val challengeAuthorPatreon: ChallengeAuthorPatreon,
-    val regionalContentRatingMap: Map<String, String> = mapOf(),
-) {
-
-
-    fun asSManga(thumbnailSource: String): SManga {
-        return SManga.create().apply {
-            url = "challengeTitleHomeMainV2?titleNo=$titleNo"
-            title = readingTitle
-            thumbnail_url = thumbnailSource+thumbnailUrl
-            author = this@ChallengeTitle.author.authorName
-            status = SManga.UNKNOWN
-            description = sourceSynopsis
-            genre = representGenre.displayName
-            update_strategy = UpdateStrategy.ALWAYS_UPDATE
-            initialized = true
-        }
-    }
-}
-
+    val mature: Boolean? = null,
+    val downloadable: Boolean? = null, //lol it is now
+    val lastEpisodeRegisterYmdt: Long? = null,
+    val likeitCount: Long? = null,
+    val regionalContentRatingMap: Map<String, String>? = null,
+    val adExposure: AdExposure? = null,
+)
 @Serializable
-data class ChallengeRewardAd(
+data class TitleRewardAd(
     val rewardAdTitle: Boolean
 )
 
 @Serializable
-data class ChallengeEpisodeMeta(
+data class TitleEpisodeMeta(
+    val pcWebLinkUrl: String? = null,
     val titleHomePcWebUrl: String,
     val totalEpisodeCount: Long,
     val firstEpisodeNo: Long,
     val firstEpisodeViewerPcWebUrl: String,
+    val firstEpisodeVideoAvailable: Boolean? = null
+)
+
+@Serializable @JsonIgnoreUnknownKeys
+data class TitleTags(
+    val unknown: String? = null
 )
 
 @Serializable
-data class ChallengeTag(
-    val tagList: List<String>
+data class TagListItem(
+    val text: String,
+    val type: String,
+    val keywordNo: Int? = null
+)
+
+@Serializable
+data class Highlight(
+    val highlightList: List<HighlightItem>
+)
+@Serializable
+data class HighlightItem(
+    val mediaType: String,
+    val coverImageUrl: String,
+    val videoId: String,
+    val scaleType: String,
 )
 
 @Serializable
@@ -103,7 +124,7 @@ data class RepresentGenre(
     val displayName: String
 )
 @Serializable
-data class ChallengeAuthor(
+data class TitleAuthor(
     val authorName: String,
     val communityId: String
 )
@@ -126,19 +147,15 @@ data class ChallengeEpisode(
     val thumbnailImageUrl: String,
     val linkUrl: String,
     val imageList: List<ChallengeEpisodeImageListItem>,
-    val creatorNote: String,
+    val creatorNote: String? = null,
     val nextEpisode: ChallengeNextPrevEpisode? = null,
+    @JsonNames("previousEpisode")
     val prevEpisode: ChallengeNextPrevEpisode? = null,
     val exposureType: String,
     val writingAuthorName: String,
     val communityAuthorList: List<ChallengeEpisodeAuthorItem>,
-    val catchUpInfo: ChallengeEpisodeCatchUpInfo
-) {
-    fun getPages(imageDomain: String): List<Page> {
-        return imageList.map { Page(index = it.sortOrder.toInt(), imageUrl = imageDomain+it.url) }
-    }
-}
-
+    val catchUpInfo: ChallengeEpisodeCatchUpInfo,
+)
 @Serializable
 data class ChallengeEpisodeCatchUpInfo(
     val showCatchUpNotification: Boolean,
@@ -148,15 +165,17 @@ data class ChallengeEpisodeCatchUpInfo(
 @Serializable
 data class ChallengeEpisodeAuthorItem(
     val id: String,
-    val profileImageUrl: String,
+    val profileImageUrl: String? = null,
     val authorType: String, //TODO create author Type enum
     val follow: Boolean = false,
 )
 
 @Serializable
-data class ChallengeAuthorPatreon(
-    val patreonUrl: String,
-    val usePatronage: Boolean
+data class AuthorPatreon(
+    val userId: Long? = null,
+    val userName: String? = null,
+    val patronUrl: String,
+    val usePatronage: Boolean? = null,
 )
 
 @Serializable
@@ -176,26 +195,48 @@ data class ChallengeEpisodeImageListItem(
 )
 
 @Serializable
-data class ChallengeEpisodeListHolder(
-    val challengeEpisodeList: List<ChallengeEpisodeItem>
+data class TitleEpisodeList(
+    @JsonNames("challengeEpisodeList")
+    val episodeList: List<TitleEpisodeStub>
+)
+
+
+
+@Serializable
+data class TitleEpisodeStub(
+    val episodeNo: Long,
+    @JsonNames("readingEpisodeTitle")
+    val episodeTitle: String,
+    val episodeThumbnail: String,
+    val exposureYmdt: Long? = null,
+    val displayUp: Boolean,
+    val hasBgm: Boolean? = null,
+    val videoAvailable: Boolean? = null,
+    val rewardAdEpisode: Boolean? = null,
+    val timeDealEpisode: Boolean? = null,
+    val productId: String? = null,
+    val exposureType: String? = productId,
+    val basicProductSaleUnit: TitleEpisodeProductSaleUnit? = null,
+    val premiumBenefitProductSaleUnitList: List<TitleEpisodeProductSaleUnit>? = null
+)
+@Serializable
+data class TitleEpisodeProductSaleUnit(
+    val productSaleUnitType: String,
+    val policyPrice: Int,
+    val policyCostPrice: Int,
+    val discounted: Boolean? = null,
+    val freeConversionYmdt: Long? = null
 )
 
 @Serializable
-data class ChallengeEpisodeItem(
-    val episodeNo: Long,
-    val readingEpisodeTitle: String,
-    val episodeThumbnail: String,
-    val exposureYmdt: Long,
-    val displayUp: Boolean,
-    val exposureType: String
-) {
-    fun asChapter(chapterUrl: String): SChapter {
-        return SChapter.create().apply {
-            url = chapterUrl + episodeNo.toString()
-            name = readingEpisodeTitle
-            chapter_number = episodeNo.toFloat()
-            date_upload = exposureYmdt
-            scanlator = exposureType
-        }
-    }
-}
+data class TitleHomeProduct(
+    val titleBMType: String,
+    val settlementWuids: List<TitleHomeProductSettlement>
+)
+
+@Serializable
+data class TitleHomeProductSettlement(
+    val wcsSettlementType: String,
+    val wuid: String,
+)
+
