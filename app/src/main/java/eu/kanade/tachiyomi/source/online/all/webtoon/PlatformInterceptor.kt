@@ -1,36 +1,39 @@
 package eu.kanade.tachiyomi.source.online.all.webtoon
 
-import eu.kanade.tachiyomi.source.online.all.webtoon.Webtoon.ImageQualitySetting.HIGH
-import eu.kanade.tachiyomi.source.online.all.webtoon.Webtoon.ImageQualitySetting.NORMAL
-import eu.kanade.tachiyomi.source.online.all.webtoon.Webtoon.ImageQualitySetting.REMOVE
 import okhttp3.HttpUrl
 import okhttp3.Interceptor
 import okhttp3.Request
 import okhttp3.Response
+import java.security.MessageDigest
 
 class PlatformInterceptor(val self: Webtoon): Interceptor {
+    val wtu = MessageDigest.getInstance("MD5").digest(self.wtu.toByteArray()).map {
+        (((it.toInt() and 255) + 255).toString(16).substring(1))
+    }.reduce(String::plus)
+
     override fun intercept(chain: Interceptor.Chain): Response {
         val requestBuilder: Request.Builder = chain.request().newBuilder()
         val urlBuilder: HttpUrl.Builder = chain.request().url.newBuilder()
-        when (chain.request().url.host) {
-            "global.apis.naver.com" -> {
-                urlBuilder.addQueryParameter("serviceZone", SERVICE_ZONE)
-                .addQueryParameter("platform", PLATFORM)
-                .addQueryParameter("language", self.lang)
-                .addQueryParameter("locale", self.locale)
-                if (!chain.request().url.queryParameterNames.contains("v")) { // v is standard as 1 except for rare cases check if already set
-                    urlBuilder.addQueryParameter("v", "1")
+        if (chain.request().method=="GET") {
+            when (chain.request().url.host) {
+                "global.apis.naver.com" -> {
+                    requestBuilder.addHeader("wtu", wtu)
+                    urlBuilder.addQueryParameter("serviceZone", SERVICE_ZONE)
+                        .addQueryParameter("platform", PLATFORM)
+                        .addQueryParameter("language", self.lang)
+                        .addQueryParameter("locale", self.locale)
+                    if (!chain.request().url.queryParameterNames.contains("v")) { // v is standard as 1 except for rare cases check if already set
+                        urlBuilder.addQueryParameter("v", "1")
+                    }
+                }
+                "webtoon-phinf.pstatic.net" -> {
+                    requestBuilder.header("referer", REFERER)
+                    urlBuilder.setQueryParameter("type", self.imageQualitySetting.type)
                 }
             }
-            "webtoon-phinf.pstatic.net" -> {
-                requestBuilder.header("referer", REFERER)
-                requestBuilder.removeHeader("wtu")
-                when (self.imageQualitySetting) {
-                    NORMAL -> urlBuilder.setQueryParameter("type", NORMAL.type)
-                    HIGH -> urlBuilder.setQueryParameter("type", HIGH.type)
-                    REMOVE -> urlBuilder.removeAllQueryParameters("type")
-                }
-            }
+        }
+        if (chain.request().method=="POST") {
+            requestBuilder.header("User-Agent", "Android/14 Model/motorolaedge30pro com.naver.linewebtoon/3.9.12(3091207,uid:10533) NeoIdSignInMod/0.1.12")
         }
 
         return chain.proceed(requestBuilder.url(urlBuilder.build()).build())

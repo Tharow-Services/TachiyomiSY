@@ -1,5 +1,6 @@
 package eu.kanade.tachiyomi.source.online.all.webtoon.dto
 
+import eu.kanade.tachiyomi.source.online.all.webtoon.Webtoon.Companion.API_DOMAIN
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.JsonNames
@@ -14,8 +15,8 @@ data class ServiceResponse<T> (
     val errorCode: Int? = null,
 ) {
     fun getResult(): T {
-        if (message==null) throw IOException(errorMessage)
-        if (message.result==null) throw IOException(message.message)
+        if (message==null) throw IOException("Remote Error from $API_DOMAIN: \'$errorMessage\' ")
+        if (message.result==null) throw IOException("Remote Error from $API_DOMAIN: \'${message.message}\' ")
         return message.result
     }
 }

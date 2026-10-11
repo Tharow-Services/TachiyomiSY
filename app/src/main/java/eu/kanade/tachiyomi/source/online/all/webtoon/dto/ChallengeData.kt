@@ -14,11 +14,21 @@ data class TitleHome(
     @JsonNames("challengeEpisodeMeta")
     val episodeMeta: TitleEpisodeMeta,
     @JsonNames("challengeAuthorPatreon")
-    val authorPatreon: AuthorPatreon? = null,
+    val authorPatreon: TitleAuthor? = null,
     val highlight: Highlight? = null,
     val product: TitleHomeProduct? = null,
     val rewardAd: TitleRewardAd? = null,
+    val notice: TitleNotice? = null
 )
+
+@Serializable
+data class TitleNotice(
+    val type: String,
+    val text: String,
+    val linkUrl: String,
+) {
+
+}
 
 @Serializable
 data class PointMessage(
@@ -47,7 +57,7 @@ data class ViewerEpisode(
     val titleHomePcWebUrl: String,
     val firstEpisodeViewerPcWebUrl: String,
     @JsonNames("challengeAuthorPatreon")
-    val authorPatreon: AuthorPatreon? = null
+    val authorPatreon: TitleAuthor? = null
 )
 @Serializable
 data class Title(
@@ -114,7 +124,8 @@ data class Highlight(
 data class HighlightItem(
     val mediaType: String,
     val coverImageUrl: String,
-    val videoId: String,
+    val imageUrlList: List<String>? = null,
+    val videoId: String?  = null,
     val scaleType: String,
 )
 
@@ -122,11 +133,6 @@ data class HighlightItem(
 data class RepresentGenre(
     val code: String, //TODO create genre enum
     val displayName: String
-)
-@Serializable
-data class TitleAuthor(
-    val authorName: String,
-    val communityId: String
 )
 
 
@@ -146,35 +152,33 @@ data class ChallengeEpisode(
     val readingEpisodeTitle: String,
     val thumbnailImageUrl: String,
     val linkUrl: String,
-    val imageList: List<ChallengeEpisodeImageListItem>,
+    val imageList: List<TitleEpisodeImageInfo>,
     val creatorNote: String? = null,
     val nextEpisode: ChallengeNextPrevEpisode? = null,
     @JsonNames("previousEpisode")
     val prevEpisode: ChallengeNextPrevEpisode? = null,
     val exposureType: String,
     val writingAuthorName: String,
-    val communityAuthorList: List<ChallengeEpisodeAuthorItem>,
-    val catchUpInfo: ChallengeEpisodeCatchUpInfo,
+    val communityAuthorList: List<TitleAuthor>,
+    val catchUpInfo: TitleEpisodeCatchUpInfo,
 )
 @Serializable
-data class ChallengeEpisodeCatchUpInfo(
+data class TitleEpisodeCatchUpInfo(
     val showCatchUpNotification: Boolean,
     val remainingEpisodeCount: Long,
 )
 
 @Serializable
-data class ChallengeEpisodeAuthorItem(
+data class TitleAuthor(
+    @JsonNames("userName")
+    val authorName: String? = null,
+    @JsonNames("communityId", "userId")
     val id: String,
     val profileImageUrl: String? = null,
-    val authorType: String, //TODO create author Type enum
+    val authorType: String? = null, //TODO create author Type enum
     val follow: Boolean = false,
-)
-
-@Serializable
-data class AuthorPatreon(
-    val userId: Long? = null,
-    val userName: String? = null,
-    val patronUrl: String,
+    val pushAlarm: Boolean = false,
+    val patronUrl: String? = null,
     val usePatronage: Boolean? = null,
 )
 
@@ -187,9 +191,11 @@ data class ChallengeNextPrevEpisode(
 )
 
 @Serializable
-data class ChallengeEpisodeImageListItem(
+data class TitleEpisodeImageInfo(
     val sortOrder: Long,
+    val cutId: Short? = null,
     val url: String,
+    val fileSize: Long? = null,
     val width: Long,
     val height: Long,
 )
@@ -240,3 +246,61 @@ data class TitleHomeProductSettlement(
     val wuid: String,
 )
 
+@Serializable
+data class TitleEpisodeInfoHolder(
+    val episodeInfo: TitleEpisodeInfo,
+    val superLikeEnabled: Boolean
+)
+
+@Serializable @JsonIgnoreUnknownKeys
+data class TitleEpisodeInfo(
+    val episodeSeq: Long,
+    val episodeTitle: String,
+    val thumbnailImageUrl: String,
+    val exposureYmdt: Long,
+    val count: Byte,
+    val imageInfo: List<TitleEpisodeImageInfo>,
+    val linkUrl: String,
+    val priorityViewingType: String,
+    val likeItCount: Long,
+    val likeIt: Boolean,
+    val bgmPlaySortOrder: Byte,
+    val serviceStatus: String,
+    val titleServiceStatus: String,
+    val writingAuthorName: String,
+    val pictureAuthorName: String,
+    val communityAuthorList: List<TitleAuthor>,
+    val creatorNote: String? = null,
+    val weekday: String? = null,
+    val adExposure: AdExposure,
+    val catchUpInfo: TitleEpisodeCatchUpInfo,
+    val bgmInfo: List<String>,
+    val bgmEffectType: String? = null,
+    val product: Boolean,
+    val dailyPass: Boolean? = null,
+    val rewardAd: Boolean? = null,
+    val timeDeal: Boolean? = null,
+    val previewProduct: Boolean? = null,
+    val completeProduct: Boolean? = null,
+    val nextEpisodeProduct: Boolean? = null,
+    val nextEpisodePreviewProduct: Boolean? = null,
+    val nextEpisodeCompleteProduct: Boolean? = null,
+    val nextEpisodeDailyPass: Boolean? = null,
+    val nextEpisodePassUseRestrictEpisode: Boolean? = null,
+    val nextEpisodeRewardAd: Boolean? = null,
+    val nextEpisodeTimeDeal: Boolean? = null,
+    val nextEpisodeNo: Long? = null,
+    val nextEpisodeTitle: String? = null,
+    val nextEpisodeViewingType: String? = null,
+    val nextEpisodeThumbnailUrl: String? = null,
+    val previousEpisodeProduct: Boolean? = null,
+    val previousEpisodePreviewProduct: Boolean? = null,
+    val previousEpisodeCompleteProduct: Boolean? = null,
+    val previousEpisodeDailyPass: Boolean? = null,
+    val previousEpisodePassUseRestrictEpisode: Boolean? = null,
+    val previousEpisodeRewardAd: Boolean? = null,
+    val previousEpisodeTimeDeal: Boolean? = null,
+    val previousEpisodeNo: Long? = null,
+    val previousEpisodeTitle: String? = null,
+    val previousEpisodeViewingType: String?  = null,
+)
