@@ -28,8 +28,8 @@ android {
     defaultConfig {
         applicationId = "eu.kanade.tachiyomi.sy"
 
-        versionCode = 81
-        versionName = "1.13.2"
+        versionCode = 82
+        versionName = "1.13.3"
 
         buildConfigField("String", "UPSTREAM_VERSION", """"0.20.1"""")
 
@@ -37,6 +37,7 @@ android {
         buildConfigField("String", "COMMIT_SHA", "\"${getLatestCommitSha()}\"")
         buildConfigField("String", "BUILD_TIME", "\"${getBuildTime(useLatestCommitTime = false)}\"")
         buildConfigField("boolean", "INCLUDE_UPDATER", "false")
+        buildConfigField("String", "GITHUB_REPO", "\"Tharow-Services/TachiyomiSY\"")
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -63,7 +64,7 @@ android {
 
             matchingFallbacks.add("release")
 
-            buildConfigField("boolean", "INCLUDE_UPDATER", "false")
+            buildConfigField("boolean", "INCLUDE_UPDATER", "true")
         }
         create("benchmark") {
             initWith(getByName("release"))

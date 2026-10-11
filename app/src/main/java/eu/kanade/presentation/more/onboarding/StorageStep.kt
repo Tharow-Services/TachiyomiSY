@@ -9,17 +9,12 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.unit.dp
 import eu.kanade.presentation.more.settings.screen.SettingsDataScreen
 import eu.kanade.tachiyomi.util.system.toast
-import kotlinx.coroutines.flow.collectLatest
 import tachiyomi.domain.storage.service.StoragePreferences
 import tachiyomi.i18n.MR
 import tachiyomi.presentation.core.components.material.Button
@@ -31,11 +26,7 @@ import uy.kohesive.injekt.api.get
 internal class StorageStep : OnboardingStep {
 
     private val storagePref = Injekt.get<StoragePreferences>().baseStorageDirectory
-
-    private var _isComplete by mutableStateOf(false)
-
-    override val isComplete: Boolean
-        get() = _isComplete
+    override val isComplete: Boolean = true
 
     @Composable
     override fun Content() {
@@ -81,11 +72,6 @@ internal class StorageStep : OnboardingStep {
             ) {
                 Text(stringResource(MR.strings.onboarding_storage_help_action))
             }
-        }
-
-        LaunchedEffect(Unit) {
-            storagePref.changes()
-                .collectLatest { _isComplete = storagePref.isSet() }
         }
     }
 }
