@@ -48,11 +48,11 @@ jobs:
         run: |
           set -e
 
-          mv app/build/outputs/apk/foss/app-universal-release-unsigned-signed.apk TachiyomiSY.apk
-          mv app/build/outputs/apk/foss/app-arm64-v8a-release-unsigned-signed.apk TachiyomiSY-arm64-v8a.apk
-          mv app/build/outputs/apk/foss/app-armeabi-v7a-release-unsigned-signed.apk TachiyomiSY-armeabi-v7a.apk
-          mv app/build/outputs/apk/foss/app-x86-release-unsigned-signed.apk TachiyomiSY-x86.apk
-          mv app/build/outputs/apk/foss/app-x86_64-release-unsigned-signed.apk TachiyomiSY-x86_64.apk
+          mv app/build/outputs/apk/foss/app-universal-foss-unsigned-signed.apk TachiyomiSY.apk
+          mv app/build/outputs/apk/foss/app-arm64-v8a-foss-unsigned-signed.apk TachiyomiSY-arm64-v8a.apk
+          mv app/build/outputs/apk/foss/app-armeabi-v7a-foss-unsigned-signed.apk TachiyomiSY-armeabi-v7a.apk
+          mv app/build/outputs/apk/foss/app-x86-release-foss-signed.apk TachiyomiSY-x86.apk
+          mv app/build/outputs/apk/foss/app-x86_64-release-foss-signed.apk TachiyomiSY-x86_64.apk
 
       - name: Create release
         uses: softprops/action-gh-release@v3
