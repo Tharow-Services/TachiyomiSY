@@ -457,12 +457,12 @@ class Webtoon(val context: Context, override val lang: String) : HttpSource(), U
                 }
                 if (isPassword) {
                     CoroutineScope(SupervisorJob() + Dispatchers.Default + CoroutineName(key)).launch {
+                        Looper.prepare()
                         try {
                             if (login(getUsername(), newValue.toString(), null)) {
                                 Toast.makeText(context, "Login Success", Toast.LENGTH_LONG).show()
                             }
                         } catch (e: Exception) {
-                            Looper.prepare()
                             Log.e("Webtoon", "Login Error", e)
                             Toast.makeText(context, "Login Error.$e", Toast.LENGTH_LONG).show()
                         }
