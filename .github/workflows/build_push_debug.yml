@@ -31,7 +31,7 @@ jobs:
         uses: gradle/actions/setup-gradle@v5
 
       - name: Build app
-        run: ./gradlew assembleRelease
+        run: ./gradlew assembleFoss
 
       - name: Sign APK
         uses: r0adkll/sign-android-release@v1
