@@ -161,7 +161,7 @@ internal object ExtensionLoader {
             }
             .toList()
 
-        if (extPkgs.isEmpty()) return emptyList()
+        if (extPkgs.isEmpty()) return INTERNAL_EXTENSIONS.map { LoadResult.Success(it.asInstalledExtension(context)) }
 
         // Load each extension concurrently and wait for completion
         return runBlocking {
