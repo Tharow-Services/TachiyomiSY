@@ -254,16 +254,9 @@ class Webtoon(val context: Context, override val lang: String) : HttpSource(), U
         return result
     }
 
-    override fun getUsername(): String = preferences.getString(PREF_USERNAME,"4anzrgez@t-0.cc")!!
+    override fun getUsername(): String = preferences.getString(PREF_USERNAME,"")!!
 
-    override fun getPassword(): String = preferences.getString(PREF_PASSWORD, "ZmR6L82Q2zMU%u")!!
-
-    private fun debugLoginSetup() {
-        preferences.edit(true) {
-            putString(PREF_USERNAME, "dev.linewebtoon@gmail.com")
-            putString(PREF_PASSWORD, "dnpqxns12!@")
-        }}
-
+    override fun getPassword(): String = preferences.getString(PREF_PASSWORD, "")!!
 
     private fun loginFromDisk() {
         userAccount = LoginById(preferences)
